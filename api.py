@@ -78,12 +78,19 @@ class Request(object):
         return self.recv_dic['form']
 
 
-def doit(fd):
-    pass
+def error(code=404):
+    e = {
+        405: b'HTTP/1.x 405 Method Not Allowed\r\n\r\n<h1>Method Not Allowed</h1>',
+        404: b'HTTP/1.x 404 NOT FOUND\r\n\r\n<h1>NOT FOUND</h1>',
+    }
+    return e.get(code, b'')
 
 
-def serve_static(fd, filename, file_size):
-    pass
+def render_template(name):
+    path = 'templates/' + name
+    with open(path, 'r', encoding='utf-8') as f:
+        return f.read().encode('utf-8')
 
-def serve_dynamic(fd, filename, cgi_args):
+
+def redirect(url):
     pass

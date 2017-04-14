@@ -1,22 +1,13 @@
 # -*- coding: UTF-8 -*-
 
 import socket
-from api import *
+from api import Request, error
+from route.view import response_index
+from route.api import *
 
 
 def log(*args, **kwargs):
     print('log', *args, **kwargs)
-
-
-def response_index():
-    return b'HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\nHello!'
-
-
-def error(code=404):
-    e = {
-        405: b'HTTP/1.x 405 Method Not Allowed\r\n\r\n<h1>Method Not Allowed</h1>',
-    }
-    return e.get(code, b'')
 
 
 def get_response(path):
@@ -25,8 +16,9 @@ def get_response(path):
     elif path == '':
         r = b''
     else:
-        r = b'404 NOT FOUND'
+        r = error(404)
 
+    return r
 
 def post_response(path, form):
     if path == '/':
@@ -34,8 +26,9 @@ def post_response(path, form):
     elif path == '':
         r = b''
     else:
-        r = b'404 NOT FOUND'
+        r = error(404)
 
+    return r
 
 def response_for_url(request):
     method = request.method
@@ -47,7 +40,6 @@ def response_for_url(request):
         return post_response(path, form)
     else:
         return error(405)
-
 
 
 def run(host=socket.gethostname(), port=10000):
@@ -80,6 +72,6 @@ def run(host=socket.gethostname(), port=10000):
 if __name__ == '__main__':
     config = dict(
         host=socket.gethostname(),
-        port=10000,
+        port=11111,
     )
     run(**config)
