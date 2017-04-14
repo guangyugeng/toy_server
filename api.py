@@ -11,21 +11,27 @@ class Request(object):
     def __parse_recv(self, recv):
         method =  recv.split()[0]
         path_query =  recv.split()[1]
-        path, query = self.__parse_path(path_query)
-        header = recv.split('\r\n\r\n')[1]
-        body = recv.split('\r\n\r\n')[2]
+        path, query = self._parse_url(path_query)
+        header_body = recv.split('\r\n', 1)[1]
+
+        header = header_body.split('\r\n\r\n')[0]
+        # log(header_body,header)
+        if len(header_body.split('\r\n\r\n')) == 1:
+            form = {}
+        else:
+            form = self._parse_form(header_body.split('\r\n\r\n')[1])
 
         d = dict(
             method=method,
             path=path,
             query=query,
-            body=body,
+            form=form,
             header=header,
         )
 
         return d
 
-    def __parse_path(self, path_query):
+    def _parse_url(self, path_query):
         index = path_query.find('?')
         if index == -1:
             return path_query, {}
@@ -37,6 +43,18 @@ class Request(object):
                 k, v = arg.split('=')
                 query[k] = v
             return path, query
+
+    def _parse_form(self, query):
+        args = query.split('&')
+        log(args)
+        if args == ['']:
+            return {}
+        else:
+            form = {}
+            for arg in args:
+                k, v = arg.split('=')
+                form[k] = v
+            return form
 
 
     @property
@@ -56,18 +74,13 @@ class Request(object):
         return self.recv_dic['header']
 
     @property
-    def body(self):
-        return self.recv_dic['body']
+    def form(self):
+        return self.recv_dic['form']
 
 
 def doit(fd):
     pass
 
-def read_requesthdrs(request_head):
-    pass
-
-def parse_url(url, filename, cgi_args):
-    pass
 
 def serve_static(fd, filename, file_size):
     pass

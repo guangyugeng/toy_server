@@ -10,8 +10,8 @@ def log(*args, **kwargs):
 s = socket.socket(AF_INET, SOCK_STREAM)
 
 host = socket.gethostname()
-port = 12345
-
+port = 10000
+log(host)
 s.connect((host, port))
 
 http_request = 'GET / HTTP/1.1\r\n\r\nhost:{}\r\nConnection: close\r\n\r\n'.format(host)
