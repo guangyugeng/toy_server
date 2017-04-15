@@ -1,8 +1,5 @@
 import functools
-
-def log(*args, **kwargs):
-    print('log', *args, **kwargs)
-
+from utils import log
 
 def error(request, code=404):
     e = {
@@ -31,16 +28,29 @@ def route_login(request):
         username = form['username']
         password = form['password']
         log(username, password)
-        r = r.replace('{{success}}')
+        r = r.replace('{{result}}', "success")
         return r
     elif request.method == 'GET':
+        r = r.replace('{{result}}', "fail")
         return r
     else:
         return error(405)
 
 
 def route_register(request):
-    return render_template('register.html')
+    form = request.form
+    r = render_template('login.html')
+    if request.method == 'POST':
+        username = form['username']
+        password = form['password']
+        log(username, password)
+        r = r.replace('{{result}}', "success")
+        return r
+    elif request.method == 'GET':
+        r = r.replace('{{result}}', "fail")
+        return r
+    else:
+        return error(405)
 
 
 view_dict = {

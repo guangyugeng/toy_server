@@ -3,20 +3,15 @@
 import socket
 from request import Request
 from route.view import view_dict, error
-
-
-def log(*args, **kwargs):
-    print('log', *args, **kwargs)
-
-
+from utils import log
 
 
 def response_for_url(request):
     path = request.path
     r = view_dict.get(path, error)
-    log(r.__name__)
+    # log(r.__name__)
     response = r(request)
-    log(response)
+    # log(response)
     return response.encode('utf-8')
 
 
@@ -49,6 +44,6 @@ def run(host=socket.gethostname(), port=10000):
 if __name__ == '__main__':
     config = dict(
         host=socket.gethostname(),
-        port=11114,
+        port=11115,
     )
     run(**config)

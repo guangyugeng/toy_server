@@ -1,8 +1,5 @@
 import os
-
-
-def log(*args, **kwargs):
-    print('log', *args, **kwargs)
+from utils import log
 
 
 def typed_property(name, expected_type):
@@ -46,19 +43,18 @@ class Request(object):
         if not isinstance(value, str):
             raise TypeError('Expected recv')
         else:
-            self._recv_dic = self.__parse_recv(value)
+            self._recv_dic = self._parse_recv(value)
 
     # Deleter function (optional)
     @recv_dic.deleter
     def recv_dic(self):
         raise AttributeError("Can't delete recv_dic")
 
-    def __parse_recv(self, recv):
+    def _parse_recv(self, recv):
         method =  recv.split()[0]
         path_query =  recv.split()[1]
         path, query = self._parse_url(path_query)
         header_body = recv.split('\r\n', 1)[1]
-
         header = header_body.split('\r\n\r\n')[0]
         # log(header_body,header)
         if len(header_body.split('\r\n\r\n')) == 1:

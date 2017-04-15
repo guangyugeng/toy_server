@@ -1,11 +1,8 @@
 from unittest import TestCase
 import unittest
 from request import Request
-
-
-def log(*args, **kwargs):
-    print('log', *args, **kwargs)
-
+from utils import log
+from models import User
 
 class TestRequest(TestCase):
     def test_request_dict(self):
@@ -46,6 +43,26 @@ Connection: close\r\n\
                 'User-Agent: search4.py (Foundations of Python Network Programming)\r\n' \
                 'Connection: close'
         assert post_request.form == { 'address':'cn', 'sensor':'false'}
+
+
+class TestModels(TestCase):
+    def test_Model(self):
+        form = {
+            'username':'xiaoming',
+            'password':'111'
+        }
+        user = User(form)
+        assert user.username == 'xiaoming'
+        assert user.password == '111'
+        user.save()
+        user.all()
+        user.delete()
+
+    def test_User(self):
+        pass
+
+
+
 
 if __name__ == '__main__':
     unittest.main()
