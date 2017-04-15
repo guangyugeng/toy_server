@@ -10,7 +10,7 @@ def log(*args, **kwargs):
 s = socket.socket(AF_INET, SOCK_STREAM)
 
 host = socket.gethostname()
-port = 10000
+port = 11114
 log(host)
 s.connect((host, port))
 

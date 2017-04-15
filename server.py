@@ -1,45 +1,29 @@
 # -*- coding: UTF-8 -*-
 
 import socket
-from api import Request, error
-from route.view import response_index
-from route.api import *
+from core import Request
+
+from route.view import view_dict
+
 
 
 def log(*args, **kwargs):
     print('log', *args, **kwargs)
 
 
-def get_response(path):
-    if path == '/':
-        r = response_index()
-    elif path == '':
-        r = b''
-    else:
-        r = error(404)
+def error(request, code=404):
+    e = {
+        405: b'HTTP/1.x 405 Method Not Allowed\r\n\r\n<h1>Method Not Allowed</h1>',
+        404: b'HTTP/1.x 404 NOT FOUND\r\n\r\n<h1>NOT FOUND</h1>',
+    }
+    return e.get(code, b'')
 
-    return r
-
-def post_response(path, form):
-    if path == '/':
-        r = response_index()
-    elif path == '':
-        r = b''
-    else:
-        r = error(404)
-
-    return r
 
 def response_for_url(request):
-    method = request.method
     path = request.path
-    form = request.form
-    if method == 'GET':
-        return get_response(path)
-    elif method == 'POST':
-        return post_response(path, form)
-    else:
-        return error(405)
+    r = view_dict.get(path, error)
+    response = r(request)
+    return response
 
 
 def run(host=socket.gethostname(), port=10000):
@@ -48,10 +32,10 @@ def run(host=socket.gethostname(), port=10000):
         s.bind((host, port))
 
         while True:
-
+            log('1')
             s.listen(5)
             connection, address = s.accept()
-
+            log('2')
             recv = connection.recv(1024)
             if len(recv) == 0:
                 continue
@@ -68,10 +52,9 @@ def run(host=socket.gethostname(), port=10000):
             connection.close()
 
 
-
 if __name__ == '__main__':
     config = dict(
         host=socket.gethostname(),
-        port=11111,
+        port=11114,
     )
     run(**config)
