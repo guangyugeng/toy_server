@@ -1,8 +1,7 @@
 # -*- coding: UTF-8 -*-
 
 import socket
-from core import Request
-
+from request import Request
 from route.view import view_dict
 
 
