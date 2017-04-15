@@ -1,6 +1,6 @@
 from unittest import TestCase
 import unittest
-from core import Request
+from request import Request
 
 
 def log(*args, **kwargs):

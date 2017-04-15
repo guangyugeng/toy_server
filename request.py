@@ -6,17 +6,10 @@ def log(*args, **kwargs):
 
 
 def typed_property(name, expected_type):
-    storage_name = '_' + name
 
     @property
     def prop(self):
-        return getattr(self, storage_name)
-
-    @prop.setter
-    def prop(self, value):
-        if not isinstance(value, expected_type):
-            raise TypeError('{} must be a {}'.format(name, expected_type))
-        setattr(self, storage_name, value)
+        return self._recv_dic[name]
 
     @prop.deleter
     def prop(self):
@@ -36,11 +29,11 @@ class Request(object):
 
     def __init__(self, recv):
         self.recv_dic = recv
-        self.method = self.recv_dic['method']
-        self.path = self.recv_dic['path']
-        self.query = self.recv_dic['query']
-        self.header = self.recv_dic['header']
-        self.form = self.recv_dic['form']
+        # self.method = self.recv_dic['method']
+        # self.path = self.recv_dic['path']
+        # self.query = self.recv_dic['query']
+        # self.header = self.recv_dic['header']
+        # self.form = self.recv_dic['form']
 
     # Getter function
     @property

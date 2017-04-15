@@ -2,27 +2,22 @@
 
 import socket
 from request import Request
-from route.view import view_dict
-
+from route.view import view_dict, error
 
 
 def log(*args, **kwargs):
     print('log', *args, **kwargs)
 
 
-def error(request, code=404):
-    e = {
-        405: b'HTTP/1.x 405 Method Not Allowed\r\n\r\n<h1>Method Not Allowed</h1>',
-        404: b'HTTP/1.x 404 NOT FOUND\r\n\r\n<h1>NOT FOUND</h1>',
-    }
-    return e.get(code, b'')
 
 
 def response_for_url(request):
     path = request.path
     r = view_dict.get(path, error)
+    log(r.__name__)
     response = r(request)
-    return response
+    log(response)
+    return response.encode('utf-8')
 
 
 def run(host=socket.gethostname(), port=10000):
