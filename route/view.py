@@ -1,12 +1,14 @@
 import functools
 from utils import log
+from models import User
+
 
 def error(request, code=404):
     e = {
-        405: b'HTTP/1.x 405 Method Not Allowed\r\n\r\n<h1>Method Not Allowed</h1>',
-        404: b'HTTP/1.x 404 NOT FOUND\r\n\r\n<h1>NOT FOUND</h1>',
+        405: 'HTTP/1.x 405 Method Not Allowed\r\n\r\n<h1>Method Not Allowed</h1>',
+        404: 'HTTP/1.x 404 NOT FOUND\r\n\r\n<h1>NOT FOUND</h1>',
     }
-    return e.get(code, b'')
+    return e.get(code, '')
 
 
 def render_template(name):
@@ -25,32 +27,37 @@ def route_login(request):
     form = request.form
     r = render_template('login.html')
     if request.method == 'POST':
-        username = form['username']
-        password = form['password']
-        log(username, password)
-        r = r.replace('{{result}}', "success")
-        return r
+        # username = form['username']
+        # password = form['password']
+        u = User(form)
+        if u.valid_login():
+            r = r.replace('{{result}}', "login success")
+        else:
+            r = r.replace('{{result}}', "login fail")
     elif request.method == 'GET':
-        r = r.replace('{{result}}', "fail")
-        return r
+        r = r.replace('{{result}}', "")
     else:
-        return error(405)
+        r = error(405)
+    return r
 
 
 def route_register(request):
     form = request.form
-    r = render_template('login.html')
+    r = render_template('register.html')
     if request.method == 'POST':
-        username = form['username']
-        password = form['password']
-        log(username, password)
-        r = r.replace('{{result}}', "success")
-        return r
+        # username = form['username']
+        # password = form['password']
+        u = User(form)
+        if u.valid_register():
+            u.save()
+            r = r.replace('{{result}}', "register success")
+        else:
+            r = r.replace('{{result}}', "register fail")
     elif request.method == 'GET':
-        r = r.replace('{{result}}', "fail")
-        return r
+        r = r.replace('{{result}}', "")
     else:
-        return error(405)
+        r = error(405)
+    return r
 
 
 view_dict = {

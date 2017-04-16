@@ -21,7 +21,7 @@ class Request(object):
     method = typed_property('method', str)
     path = typed_property('path', str)
     query = typed_property('query', dict)
-    header = typed_property('header', str)
+    header = typed_property('header', dict)
     form = typed_property('form', dict)
 
     def __init__(self, recv):
@@ -50,7 +50,7 @@ class Request(object):
         path_query =  recv.split()[1]
         path, query = self._parse_url(path_query)
         header_body = recv.split('\r\n', 1)[1]
-        header = header_body.split('\r\n\r\n')[0]
+        header = self._parse_header(header_body.split('\r\n\r\n')[0])
         # log(header_body,header)
         if len(header_body.split('\r\n\r\n')) == 1:
             form = {}
@@ -82,7 +82,7 @@ class Request(object):
 
     def _parse_form(self, query):
         args = query.split('&')
-        log(args)
+        # log(args)
         if args == ['']:
             return {}
         else:
@@ -92,4 +92,18 @@ class Request(object):
                 form[k] = v
             return form
 
+    def _parse_header(self, query):
+        args = query.split('\r\n')
+        if args == ['']:
+            return {}
+        else:
+            form = {}
+            for arg in args:
+                k, v = arg.split(': ')
+                form[k] = v
+            return form
 
+
+# Host: maps.google.com:80\r\n' \
+#                 'User-Agent: search4.py (Foundations of Python Network Programming)\r\n' \
+#                 'Connection: close'

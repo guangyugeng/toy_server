@@ -32,7 +32,7 @@ def run(host=socket.gethostname(), port=10000):
             request = Request(recv.decode('utf-8'))
 
             path = request.path
-            print('path1, ', path == '/')
+            print('path1, ', path)
 
             r = response_for_url(request)
 
@@ -44,6 +44,6 @@ def run(host=socket.gethostname(), port=10000):
 if __name__ == '__main__':
     config = dict(
         host=socket.gethostname(),
-        port=11115,
+        port=11116,
     )
     run(**config)
