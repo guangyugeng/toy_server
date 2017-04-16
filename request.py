@@ -26,11 +26,6 @@ class Request(object):
 
     def __init__(self, recv):
         self.recv_dic = recv
-        # self.method = self.recv_dic['method']
-        # self.path = self.recv_dic['path']
-        # self.query = self.recv_dic['query']
-        # self.header = self.recv_dic['header']
-        # self.form = self.recv_dic['form']
 
     # Getter function
     @property

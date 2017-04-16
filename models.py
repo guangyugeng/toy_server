@@ -1,38 +1,31 @@
 from utils import log
 import json
 
-class User(object):
-    def __init__(self, form):
-        self.id = len(self.all()) + 1
-        self.username = form.get('username', '')
-        self.password = form.get('password', '')
-
-    def __repr__(self):
-        classname = self.__class__.__name__
-        properties = ['{}: ({})'.format(k, v) for k, v in self.__dict__.items()]
-        s = '\n'.join(properties)
-        return '< {}\n{} \n>\n'.format(classname, s)
+class Model(object):
+    def __init__(self):
+        path = self.__class__._get_path()
+        model_dict = self.__class__._load(path)
+        self.id = len(model_dict) + 1
 
     @classmethod
     def all(cls):
         path = cls._get_path()
-        model_dict = cls._load(path)
-        models = [cls(m) for m in model_dict]
-        return models
+        model_list = cls._load(path)
+        return model_list
 
     def save(self):
+        model_list = self.all()
+        log(model_list)
+        model_list.append(self.__dict__)
         path = self._get_path()
-        models = self.all()
-        models.append(self)
-        model_dict = [m.__dict__ for m in models]
-        self._save(model_dict, path)
+        self._save(model_list, path)
 
-    # def delete(self):
-    #     path = self._get_path()
-    #     models = self.all()
-    #     models.remove(self.id)
-    #     model_dict = [m.__dict__ for m in models]
-    #     self._save(model_dict, path)
+    def delete(self):
+        model_list = self.all()
+        m = filter(lambda m: m['id'] == self.id, model_list).__next__()
+        model_list.remove(m)
+        path = self._get_path()
+        self._save(model_list, path)
 
     @classmethod
     def _get_path(cls):
@@ -48,15 +41,21 @@ class User(object):
             return json.loads(s)
 
     @classmethod
-    def _save(cls, model_dict, path):
-        d = json.dumps(model_dict, indent=2, ensure_ascii=False)
+    def _save(cls, model_list, path):
+        d = json.dumps(model_list, indent=2, ensure_ascii=False)
         with open(path, 'w+', encoding='utf-8') as f:
-            log('save', path, d, model_dict)
+            log('save', path, d)
             f.write(d)
 
-#
-# class User(Model):
-#     def __init__(self, form):
-#         self.username = form.get('username', '')
-#         self.password = form.get('password', '')
-#
+    def __repr__(self):
+        classname = self.__class__.__name__
+        properties = ['{}: ({})'.format(k, v) for k, v in self.__dict__.items()]
+        s = '\n'.join(properties)
+        return '< {}\n{} \n>\n'.format(classname, s)
+
+
+class User(Model):
+    def __init__(self, form):
+        super().__init__()
+        self.username = form.get('username', '')
+        self.password = form.get('password', '')
