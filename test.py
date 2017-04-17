@@ -52,10 +52,10 @@ Connection: close\r\n\
     def test_Cookie(self):
         cookie = Cookie()
         cookie.version = 1
-        cookie.user = 'xiaoming'
-        assert cookie.user == 'xiaoming'
+        cookie.id = 'xiaoming'
+        assert cookie.id == 'xiaoming'
         assert cookie.version == 1
-        assert cookie.__str__() == "user=xiaoming;version=1"
+        assert cookie.__str__() == "id=xiaoming;version=1"
 
     def test_response(self):
         response = Response()

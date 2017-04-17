@@ -10,12 +10,12 @@ def log(*args, **kwargs):
 
 class Cookie(object):
     def __init__(self):
-        self.user = None
-        self.max_age = ''
+        self.id = None
+        self.max_age = 'Session'
         self.version = 1
 
     def __str__(self):
-        return 'user={};version={}'.format(self.user,self.version)
+        return 'id={};version={}'.format(self.id,self.version)
 
 
 class Session(dict):

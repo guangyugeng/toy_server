@@ -2,12 +2,21 @@ import functools
 from utils import log
 from models import User
 from utils import Session, Cookie, Response
-
+import random
 
 session = Session()
 
 
-def error(request, code=404):
+def random_str():
+    seed = 'abcdefjsad89234hdsfkljasdkjghigaksldf89weru'
+    s = ''
+    for i in range(16):
+        random_index = random.randint(0, len(seed) - 2)
+        s += seed[random_index]
+    return s
+
+
+def error(code=404):
     e = {
         405: 'HTTP/1.x 405 Method Not Allowed\r\n\r\n<h1>Method Not Allowed</h1>',
         404: 'HTTP/1.x 404 NOT FOUND\r\n\r\n<h1>NOT FOUND</h1>',
@@ -37,8 +46,10 @@ def route_login(request):
         u = User(form)
         if u.valid_login():
             r.body = r.body.replace('{{result}}', "login success")
-            session['user'] = u.username
+            cookie_id = random_str()
+            session['cookie'] = cookie_id
             cookie = Cookie()
+            cookie.id = cookie_id
             r.headers['Set-Cookie'] = cookie.__str__()
         else:
             r.body = r.body.replace('{{result}}', "login fail")

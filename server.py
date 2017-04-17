@@ -21,10 +21,8 @@ def run(host=socket.gethostname(), port=10000):
         s.bind((host, port))
 
         while True:
-            log('1')
             s.listen(5)
             connection, address = s.accept()
-            log('2')
             recv = connection.recv(1024)
             if len(recv) == 0:
                 continue
@@ -32,7 +30,6 @@ def run(host=socket.gethostname(), port=10000):
             request = Request(recv.decode('utf-8'))
 
             path = request.path
-            print('path1, ', path)
 
             r = response_for_url(request)
 

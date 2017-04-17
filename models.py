@@ -1,6 +1,7 @@
 from utils import log
 import json
 
+
 class Model(object):
     def __init__(self):
         path = self.__class__._get_path()
