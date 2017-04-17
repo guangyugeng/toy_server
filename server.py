@@ -1,16 +1,16 @@
 # -*- coding: UTF-8 -*-
 
 import socket
-from request import Request
+from utils import Request
 from route.view import view_dict, error
 from utils import log
 
 
 def response_for_url(request):
     path = request.path
-    r = view_dict.get(path, error)
+    route = view_dict.get(path, error)
     # log(r.__name__)
-    response = r(request)
+    response = route(request)
     # log(response)
     return response.encode('utf-8')
 

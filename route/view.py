@@ -1,6 +1,10 @@
 import functools
 from utils import log
 from models import User
+from utils import Session, Cookie, Response
+
+
+session = Session()
 
 
 def error(request, code=404):
@@ -11,53 +15,58 @@ def error(request, code=404):
     return e.get(code, '')
 
 
-def render_template(name):
+def render_template(name, response):
     path = 'templates/' + name
-    header = 'HTTP/1.x 200 OK\r\nContent-Type: text/html\r\n'
     with open(path, 'r', encoding='utf-8') as f:
-        return header + '\r\n' + f.read()
+        response.body = f.read()
+        return response
 
 
 def route_index(request):
     # log('route_index')
-    return render_template('index.html')
+    r = Response()
+    return render_template('index.html', r).__str__()
 
 
 def route_login(request):
     form = request.form
-    r = render_template('login.html')
+    # headers = request.headers
+    r = Response()
+    r = render_template('login.html', r)
     if request.method == 'POST':
-        # username = form['username']
-        # password = form['password']
         u = User(form)
         if u.valid_login():
-            r = r.replace('{{result}}', "login success")
+            r.body = r.body.replace('{{result}}', "login success")
+            session['user'] = u.username
+            cookie = Cookie()
+            r.headers['Set-Cookie'] = cookie.__str__()
         else:
-            r = r.replace('{{result}}', "login fail")
+            r.body = r.body.replace('{{result}}', "login fail")
     elif request.method == 'GET':
-        r = r.replace('{{result}}', "")
+        r.body = r.body.replace('{{result}}', "")
     else:
         r = error(405)
-    return r
+
+    return r.__str__()
 
 
 def route_register(request):
     form = request.form
-    r = render_template('register.html')
+    r = Response()
+    r = render_template('register.html', r)
+
     if request.method == 'POST':
-        # username = form['username']
-        # password = form['password']
         u = User(form)
         if u.valid_register():
             u.save()
-            r = r.replace('{{result}}', "register success")
+            r.body = r.body.replace('{{result}}', "register success")
         else:
-            r = r.replace('{{result}}', "register fail")
+            r.body = r.body.replace('{{result}}', "register fail")
     elif request.method == 'GET':
-        r = r.replace('{{result}}', "")
+        r.body = r.body.replace('{{result}}', "")
     else:
         r = error(405)
-    return r
+    return r.__str__()
 
 
 view_dict = {
