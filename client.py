@@ -7,7 +7,6 @@ from utils import log
 def send(port, host=socket.gethostname()):
     s = socket.socket(AF_INET, SOCK_STREAM)
 
-
     log(host)
     s.connect((host, port))
 

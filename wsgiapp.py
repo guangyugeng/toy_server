@@ -1,7 +1,9 @@
+# from route.view import view_dict, error
+
 import functools
 from utils import log
 from models import User
-from utils import Session, Cookie, Response
+from utils import Session, Cookie, Response, Request
 import random
 
 session = Session()
@@ -16,29 +18,36 @@ def random_str():
     return s
 
 
-def error(code=404):
-    e = {
-        405: 'HTTP/1.x 405 Method Not Allowed\r\n\r\n<h1>Method Not Allowed</h1>',
-        404: 'HTTP/1.x 404 NOT FOUND\r\n\r\n<h1>NOT FOUND</h1>',
-    }
-    return e.get(code, '')
+def route_404_error(request):
+    r = Response()
+    r.status = '404 NOT FOUND'
+    r.body = '<h1>NOT FOUND</h1>'
+    return r
 
 
-def render_template(name):
+def route_405_error(request):
+    r = Response()
+    r.status = '405 Method Not Allowed'
+    r.body = '<h1>Method Not Allowed</h1>'
+    return r
+
+
+def render_template(name, response):
     path = 'templates/' + name
     with open(path, 'r', encoding='utf-8') as f:
-        return f.read()
+        response.body = f.read()
+        return response
 
 
 def route_index(request):
-    # log('route_index')
-    return render_template('index.html')
+    r = Response()
+    return render_template('index.html', r)
 
 
 def route_login(request):
     form = request.form
-    # headers = request.headers
-    body = render_template('login.html')
+    r = Response()
+    r = render_template('login.html', r)
     if request.method == 'POST':
         u = User(form)
         if u.valid_login():
@@ -47,15 +56,15 @@ def route_login(request):
             session['cookie'] = cookie_id
             cookie = Cookie()
             cookie.id = cookie_id
-            r.headers['Set-Cookie'] = cookie.__str__()
+            r.headers.append(('Set-Cookie', cookie.__str__()))
         else:
             r.body = r.body.replace('{{result}}', "login fail")
     elif request.method == 'GET':
         r.body = r.body.replace('{{result}}', "")
     else:
-        r = error(405)
+        r = route_405_error(request)
 
-    return r.__str__()
+    return r
 
 
 def route_register(request):
@@ -73,8 +82,8 @@ def route_register(request):
     elif request.method == 'GET':
         r.body = r.body.replace('{{result}}', "")
     else:
-        r = error(405)
-    return r.__str__()
+        r = route_405_error(request)
+    return r
 
 
 view_dict = {
@@ -83,3 +92,10 @@ view_dict = {
     '/register': route_register,
 }
 
+
+def app(environ, start_response):
+    route = view_dict.get(environ['PATH_INFO'], route_404_error)
+    request = Request(environ['wsgi.input'].read())
+    response = route(request)
+    start_response(response.status, response.headers)
+    return response.body

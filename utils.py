@@ -26,22 +26,20 @@ class Response(object):
     # __slots__ = []
 
     def __init__(self):
-        self.status_code = 200
-        self.status_text = 'OK'
-        self.headers = { 'Content-Type': 'text/html' }
+        self.status = '200 OK'
+        self.headers = [ ('Content-Type', 'text/html') ]
         self.body = "<h1>Hello</h1>"
 
     def headers_format(self):
         s = ''
-        for k,v in self.headers.items():
-            s = s + '{}: {}\r\n'.format(k,v)
+        for header in self.headers:
+            s = s + '{}: {}\r\n'.format(*header)
         return s
 
     def __str__(self):
-        return 'HTTP/1.x {} {}\r\n{}\r\n{}'.format(self.status_code,
-                                                       self.status_text,
-                                                       self.headers_format(),
-                                                       self.body)
+        return 'HTTP/1.x {} \r\n{}\r\n{}'.format(self.status,
+                                                 self.headers_format(),
+                                                 self.body)
 
 
 def request_property(name, expected_type):
@@ -72,6 +70,7 @@ class Request(object):
 
     def __init__(self, recv):
         self.recv_dic = recv
+        self.recv = recv
 
     # Getter function
     @property
