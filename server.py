@@ -70,7 +70,7 @@ class WSGIServer(object):
         env['PATH_INFO']         = self.request.path              # /hello
         env['SERVER_NAME']       = self.server_name       # localhost
         env['SERVER_PORT']       = str(self.server_port)  # 8888
-        env['QUERY_STRING']      = self.request.query
+        env['QUERY_STRING']      = self.request.query_str
         return env
 
     def start_response(self, status, response_headers, exc_info=None):
@@ -87,11 +87,19 @@ class WSGIServer(object):
 
     def finish_response(self, body):
         try:
-            response = Response()
+            # response = Response()
+            # status, response_headers = self.headers_set
+            # response.status = status
+            # response.headers = response_headers
+            # response.body = body
             status, response_headers = self.headers_set
-            response.status = status
-            response.headers = response_headers
-            response.body = body
+            response = 'HTTP/1.1 {status}\r\n'.format(status=status)
+            for header in response_headers:
+                response += '{0}: {1}\r\n'.format(*header)
+            response += '\r\n'
+            for data in body:
+                response += data.decode('utf-8')
+
             self.client_connection.sendall(response.__str__().encode('utf-8'))
         finally:
             self.client_connection.close()

@@ -64,6 +64,7 @@ class Request(object):
     method = request_property('method', str)
     path = request_property('path', str)
     query = request_property('query', dict)
+    query_str = request_property('query_str', str)
     headers = request_property('headers', dict)
     form = request_property('form', dict)
     cookies = request_property('cookies', dict)
@@ -93,7 +94,7 @@ class Request(object):
     def _parse_recv(self, recv):
         method =  recv.split()[0]
         path_query =  recv.split()[1]
-        path, query = self._parse_url(path_query)
+        path, query, query_str = self._parse_url(path_query)
         header_body = recv.split('\r\n', 1)[1]
         headers = self._parse_header(header_body.split('\r\n\r\n')[0])
         cookies = self._parse_cookies(headers)
@@ -107,6 +108,7 @@ class Request(object):
             method=method,
             path=path,
             query=query,
+            query_str=query_str,
             form=form,
             headers=headers,
             cookies=cookies,
@@ -117,7 +119,7 @@ class Request(object):
     def _parse_url(self, path_query):
         index = path_query.find('?')
         if index == -1:
-            return path_query, {}
+            return path_query, {}, ''
         else:
             path, query_string = path_query.split('?', 1)
             args = query_string.split('&')
@@ -125,7 +127,7 @@ class Request(object):
             for arg in args:
                 k, v = arg.split('=')
                 query[k] = v
-            return path, query
+            return path, query, query_string
 
     def _parse_form(self, query):
         args = query.split('&')
