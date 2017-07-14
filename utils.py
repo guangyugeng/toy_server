@@ -148,6 +148,7 @@ class Request(object):
         else:
             form = {}
             for arg in args:
+                print('arg', arg)
                 k, v = arg.split(': ')
                 form[k] = v
             return form

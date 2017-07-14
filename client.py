@@ -10,7 +10,7 @@ def send(port, host=socket.gethostname()):
     log(host)
     s.connect((host, port))
 
-    http_request = 'GET / HTTP/1.1\r\n\r\nhost:{}\r\nConnection: close\r\n\r\n'.format(host)
+    http_request = 'GET / HTTP/1.1\r\nhost:{}\r\nConnection: close\r\n\r\n'.format(host)
 
     request = http_request.encode('utf-8')
 

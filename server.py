@@ -6,15 +6,22 @@ from route.view import view_dict, error
 from utils import log
 from io import StringIO
 import sys
+import errno
+import os
+import signal
 
 
-def response_for_url(request):
-    path = request.path
-    route = view_dict.get(path, error)
-    # log(r.__name__)
-    response = route(request)
-    # log(response)
-    return response.encode('utf-8')
+def grim_reaper(signum, frame):
+    while True:
+        try:
+            pid, status = os.waitpid(
+                -1,          ### 等待所有子进程
+                 os.WNOHANG  ### 无终止进程时，不阻塞进程，并抛出 EWOULDBLOCK 错误
+            )
+        except OSError:
+            return
+        if pid == 0:  ### 没有僵尸进程存在了
+            return
 
 
 class WSGIServer(object):
@@ -41,11 +48,25 @@ class WSGIServer(object):
 
     def serve_forever(self):
         listen_socket = self.listen_socket
+        signal.signal(signal.SIGCHLD, grim_reaper)
         while True:
-            ### 获取新的客户端连接
-            self.client_connection, client_address = listen_socket.accept()
-            ### 处理一条请求后关闭连接，然后循环等待另一个连接建立
-            self.handle_one_request()
+            # ### 获取新的客户端连接
+            try:
+                self.client_connection, client_address = listen_socket.accept()
+            except IOError as e:
+                code, msg = e.args
+                ### 若 'accept' 被打断，那么重启它
+                if code == errno.EINTR:
+                    continue
+                else:
+                    raise
+            pid = os.fork()
+            if pid == 0:  ### 子进程
+                listen_socket.close()  ### 关闭子进程中多余的描述符
+                self.handle_one_request()
+                os._exit(0)
+            else:  ### 父进程
+                self.client_connection.close()  ### 关闭父进程中多余的描述符，继续下一轮循环
 
     def handle_one_request(self):
         self.request_data = request_data = self.client_connection.recv(1024).decode('utf-8')
@@ -66,10 +87,10 @@ class WSGIServer(object):
         env['wsgi.multiprocess'] = False
         env['wsgi.run_once']     = False
         ### CGI 必需变量
-        env['REQUEST_METHOD']    = self.request.method    # GET
-        env['PATH_INFO']         = self.request.path              # /hello
-        env['SERVER_NAME']       = self.server_name       # localhost
-        env['SERVER_PORT']       = str(self.server_port)  # 8888
+        env['REQUEST_METHOD']    = self.request.method
+        env['PATH_INFO']         = self.request.path
+        env['SERVER_NAME']       = self.server_name
+        env['SERVER_PORT']       = str(self.server_port)
         env['QUERY_STRING']      = self.request.query_str
         return env
 
@@ -94,7 +115,6 @@ class WSGIServer(object):
             response += '\r\n'
             for data in body:
                 response += data.decode('utf-8')
-
             self.client_connection.sendall(response.__str__().encode('utf-8'))
         finally:
             self.client_connection.close()
