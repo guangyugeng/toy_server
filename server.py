@@ -87,11 +87,6 @@ class WSGIServer(object):
 
     def finish_response(self, body):
         try:
-            # response = Response()
-            # status, response_headers = self.headers_set
-            # response.status = status
-            # response.headers = response_headers
-            # response.body = body
             status, response_headers = self.headers_set
             response = 'HTTP/1.1 {status}\r\n'.format(status=status)
             for header in response_headers:

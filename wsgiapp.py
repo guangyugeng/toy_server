@@ -98,4 +98,4 @@ def app(environ, start_response):
     request = Request(environ['wsgi.input'].read())
     response = route(request)
     start_response(response.status, response.headers)
-    return response.body.encode('utf-8')
+    return [response.body.encode('utf-8')]
